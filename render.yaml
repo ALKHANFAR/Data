@@ -2,6 +2,7 @@ services:
   # Web Service (FastAPI Backend)
   - type: web
     name: data-cleaner-api
+    runtime: python
     env: python
     region: oregon
     plan: starter
@@ -11,7 +12,7 @@ services:
     healthCheckPath: /api/v1/health
     envVars:
       - key: PYTHON_VERSION
-        value: 3.11.0
+        value: 3.11.9
       - key: SECRET_KEY
         generateValue: true
       - key: DATABASE_URL
@@ -43,6 +44,7 @@ services:
   # Celery Worker (Background Tasks)
   - type: worker
     name: data-cleaner-worker
+    runtime: python
     env: python
     region: oregon
     plan: starter
@@ -51,7 +53,7 @@ services:
     startCommand: celery -A backend.tasks.celery_app worker --loglevel=info
     envVars:
       - key: PYTHON_VERSION
-        value: 3.11.0
+        value: 3.11.9
       - key: SECRET_KEY
         sync: false
       - key: DATABASE_URL
