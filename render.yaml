@@ -4,7 +4,6 @@ services:
     name: data-cleaner-api
     runtime: python
     env: python
-    pythonVersion: "3.11.9"
     region: oregon
     plan: starter
     branch: main

@@ -22,11 +22,11 @@ passlib[bcrypt]==1.7.4
 python-dotenv==1.0.0
 cryptography==42.0.5
 
-# Data Processing - Optimized for Python 3.11.9 with pre-built wheels
+# Data Processing - Compatible with Python 3.13
 numpy==1.26.4
-pandas==2.1.4
-openpyxl==3.1.2
-xlsxwriter==3.1.9
+pandas==2.2.3
+openpyxl==3.1.5
+xlsxwriter==3.2.0
 
 # Validation
 pydantic==2.5.2
