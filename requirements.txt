@@ -22,11 +22,12 @@ passlib[bcrypt]==1.7.4
 python-dotenv==1.0.0
 cryptography==41.0.7
 
-# Data Processing - UPDATED for Python 3.11+
-pandas==2.1.4
+# Data Processing - FIXED for Render deployment
+# Using versions with pre-built wheels
+numpy==1.26.0
+pandas==2.1.1
 openpyxl==3.1.2
 xlsxwriter==3.1.9
-numpy==1.26.2
 
 # Validation
 pydantic==2.5.2
@@ -39,8 +40,8 @@ httpx==0.25.2
 aiohttp==3.9.1
 requests==2.31.0
 
-# AI & ML
-scikit-learn==1.3.2
+# AI & ML - Using versions with pre-built wheels
+scikit-learn==1.3.1
 fuzzywuzzy==0.18.0
 python-Levenshtein==0.23.0
 
