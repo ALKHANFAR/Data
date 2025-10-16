@@ -23,8 +23,8 @@ python-dotenv==1.0.0
 cryptography==41.0.7
 
 # Data Processing - FIXED for Render deployment
-# Using versions with pre-built wheels
-numpy==1.26.0
+# Using versions with pre-built wheels compatible with Python 3.11
+numpy==1.25.2
 pandas==2.1.1
 openpyxl==3.1.2
 xlsxwriter==3.1.9
