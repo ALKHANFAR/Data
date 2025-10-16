@@ -1,7 +1,7 @@
 """
 Export Endpoints
 """
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Path
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Optional
@@ -66,8 +66,8 @@ async def download_export(export_id: str):
 
 @router.get("/{job_id}/channel/{channel}")
 async def export_by_channel(
-    job_id: str,
-    channel: str = Query(..., regex="^(email|whatsapp|call)$")
+    job_id: str = Path(..., description="Job ID"),
+    channel: str = Path(..., pattern="^(email|whatsapp|call)$", description="Marketing channel")
 ):
     """
     Export data formatted for specific marketing channel
