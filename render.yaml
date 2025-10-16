@@ -4,6 +4,7 @@ services:
     name: data-cleaner-api
     runtime: python
     env: python
+    pythonVersion: "3.11.9"
     region: oregon
     plan: starter
     branch: main
@@ -11,8 +12,6 @@ services:
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.9
       - key: SECRET_KEY
         generateValue: true
       - key: DATABASE_URL
