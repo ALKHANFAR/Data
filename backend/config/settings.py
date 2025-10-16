@@ -43,7 +43,14 @@ class Settings(BaseSettings):
     CELERY_RESULT_BACKEND: str = "redis://localhost:6379/0"
     
     # CORS
-    CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8000"]
+    CORS_ORIGINS: str = "http://localhost:3000,http://localhost:8000"
+    
+    @property
+    def cors_origins_list(self) -> List[str]:
+        """Get list of CORS origins"""
+        if self.CORS_ORIGINS == "*":
+            return ["*"]
+        return [origin.strip() for origin in self.CORS_ORIGINS.split(',')]
     
     @property
     def allowed_extensions_list(self) -> List[str]:
