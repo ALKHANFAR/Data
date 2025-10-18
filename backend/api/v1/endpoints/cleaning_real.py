@@ -123,12 +123,12 @@ def process_cleaning_job(job_id: str, file_id: str, settings_dict: dict):
         # Step 7: Geographic classification
         if settings_dict.get('classify_geographic', True):
             Database.update_job_progress(job_id, 0.8, "جاري التصنيف الجغرافي...", "processing")
-            df = cleaner.classify_geographic(df)
+            df = cleaner.classify_geographic(df, detections)
         
         # Step 8: Industry classification
         if settings_dict.get('classify_industry', True):
             Database.update_job_progress(job_id, 0.85, "جاري تصنيف الأنشطة...", "processing")
-            df = cleaner.classify_industry(df)
+            df = cleaner.classify_industry(df, detections)
         
         # Step 9: Find duplicates
         if settings_dict.get('remove_duplicates', True):
