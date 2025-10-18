@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام التنظيف الاحترافي - Enterprise Data Cleaner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin: 5px;
+            font-weight: bold;
+        }
+        
+        .main-section {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 60px 40px;
+            text-align: center;
+            background: #f8f9ff;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .upload-area:hover {
+            background: #eef2ff;
+            border-color: #764ba2;
+            transform: scale(1.02);
+        }
+        
+        .upload-area.dragover {
+            background: #e0e7ff;
+            border-color: #10b981;
+            transform: scale(1.05);
+        }
+        
+        .upload-icon {
+            font-size: 80px;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        
+        .upload-text {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .upload-hint {
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-block;
+            margin: 10px;
+        }
+        
+        .btn:hover {
+            background: #764ba2;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-success {
+            background: #10b981;
+        }
+        
+        .btn-success:hover {
+            background: #059669;
+        }
+        
+        .progress-section {
+            display: none;
+            margin-top: 30px;
+        }
+        
+        .progress-section.show {
+            display: block;
+        }
+        
+        .progress-bar-container {
+            background: #e5e7eb;
+            border-radius: 10px;
+            height: 40px;
+            overflow: hidden;
+            margin: 20px 0;
+            position: relative;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .progress-text {
+            text-align: center;
+            font-size: 1.2em;
+            color: #333;
+            margin: 10px 0;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .results-section {
+            display: none;
+            margin-top: 30px;
+        }
+        
+        .results-section.show {
+            display: block;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .result-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .preview-table th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.1em;
+        }
+        
+        .preview-table td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .preview-table tr:hover {
+            background: #f8f9ff;
+        }
+        
+        .status-valid {
+            color: #10b981;
+            font-weight: bold;
+        }
+        
+        .status-error {
+            color: #ef4444;
+            font-weight: bold;
+        }
+        
+        .status-warning {
+            color: #f59e0b;
+            font-weight: bold;
+        }
+        
+        .alert {
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 1.1em;
+        }
+        
+        .alert-success {
+            background: #d1fae5;
+            border: 2px solid #10b981;
+            color: #065f46;
+        }
+        
+        .alert-error {
+            background: #fee2e2;
+            border: 2px solid #ef4444;
+            color: #991b1b;
+        }
+        
+        .alert-info {
+            background: #dbeafe;
+            border: 2px solid #3b82f6;
+            color: #1e3a8a;
+        }
+        
+        .section-title {
+            color: #667eea;
+            font-size: 1.8em;
+            margin: 30px 0 20px 0;
+            font-weight: bold;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .feature-item {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 8px;
+            border-right: 4px solid #667eea;
+        }
+        
+        .feature-item strong {
+            color: #667eea;
+            font-size: 1.1em;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .upload-area {
+                padding: 40px 20px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🚀 نظام التنظيف الاحترافي</h1>
+            <p class="subtitle">ارفع ملفك واترك الباقي علينا - تنظيف وتصنيف احترافي بالذكاء الاصطناعي</p>
+            <div>
+                <span class="badge">✅ Industrial Grade</span>
+                <span class="badge">🔒 آمن 100%</span>
+                <span class="badge">⚡ سريع</span>
+                <span class="badge">🎯 دقيق</span>
+            </div>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="main-section">
+            <div id="uploadArea" class="upload-area">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">اسحب ملف Excel أو CSV هنا</div>
+                <div class="upload-hint">أو اضغط لاختيار الملف من جهازك</div>
+                <input type="file" id="fileInput" class="file-input" accept=".xlsx,.xls,.csv">
+                <button class="btn" onclick="document.getElementById('fileInput').click()">
+                    📤 اختر الملف
+                </button>
+                <div style="margin-top: 20px; color: #666;">
+                    <small>يدعم: Excel (.xlsx, .xls) و CSV (.csv) | الحد الأقصى: 50 ميجابايت</small>
+                </div>
+            </div>
+
+            <!-- Progress Section -->
+            <div id="progressSection" class="progress-section">
+                <div class="section-title">⏳ جاري المعالجة...</div>
+                <div class="progress-bar-container">
+                    <div id="progressBar" class="progress-bar">0%</div>
+                </div>
+                <div id="progressText" class="progress-text">جاري تحليل البيانات...</div>
+                <div class="spinner"></div>
+            </div>
+
+            <!-- Results Section -->
+            <div id="resultsSection" class="results-section">
+                <div class="alert alert-success">
+                    <strong>✅ تم التنظيف بنجاح!</strong> البيانات جاهزة الآن
+                </div>
+
+                <div class="section-title">📊 إحصائيات النتائج</div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalRows">0</div>
+                        <div class="stat-label">إجمالي الصفوف</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="cleanedRows">0</div>
+                        <div class="stat-label">تم تنظيفها</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="validPhones">0</div>
+                        <div class="stat-label">أرقام صحيحة</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="validEmails">0</div>
+                        <div class="stat-label">إيميلات صحيحة</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="duplicates">0</div>
+                        <div class="stat-label">تكرارات</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="classified">0</div>
+                        <div class="stat-label">تم تصنيفها</div>
+                    </div>
+                </div>
+
+                <div class="section-title">🎯 خيارات التصدير</div>
+                <div class="result-actions">
+                    <button class="btn btn-success" onclick="downloadResults('excel')">
+                        📥 تحميل Excel نظيف
+                    </button>
+                    <button class="btn btn-success" onclick="downloadResults('csv')">
+                        📥 تحميل CSV
+                    </button>
+                    <button class="btn" onclick="viewPreview()">
+                        👁️ معاينة البيانات
+                    </button>
+                    <button class="btn" onclick="viewDetails()">
+                        📋 تفاصيل التنظيف
+                    </button>
+                    <button class="btn" onclick="resetPage()">
+                        🔄 ملف جديد
+                    </button>
+                </div>
+
+                <div id="previewSection" class="hidden">
+                    <div class="section-title">👁️ معاينة النتائج (أول 10 صفوف)</div>
+                    <div style="overflow-x: auto;">
+                        <table id="previewTable" class="preview-table">
+                            <!-- Will be populated by JavaScript -->
+                        </table>
+                    </div>
+                </div>
+
+                <div id="detailsSection" class="hidden">
+                    <div class="section-title">📋 تفاصيل التنظيف</div>
+                    <div class="feature-list">
+                        <div class="feature-item">
+                            <strong>📱 الهواتف:</strong> تنسيق دولي، إزالة الامتدادات، كشف الأرقام المزيفة
+                        </div>
+                        <div class="feature-item">
+                            <strong>📧 الإيميلات:</strong> كشف الأخطاء الإملائية، الإيميلات المؤقتة، التصحيح التلقائي
+                        </div>
+                        <div class="feature-item">
+                            <strong>👤 الأسماء:</strong> إزالة الألقاب، استخراج الأرقام، التطبيع
+                        </div>
+                        <div class="feature-item">
+                            <strong>🏢 الشركات:</strong> إزالة اللواحق القانونية، التوحيد
+                        </div>
+                        <div class="feature-item">
+                            <strong>🌍 التصنيف الجغرافي:</strong> تحديد المدن والمناطق تلقائياً
+                        </div>
+                        <div class="feature-item">
+                            <strong>🏭 تصنيف الأنشطة:</strong> تحديد نوع النشاط التجاري
+                        </div>
+                        <div class="feature-item">
+                            <strong>🔄 كشف التكرار:</strong> تحديد الصفوف المكررة
+                        </div>
+                        <div class="feature-item">
+                            <strong>✨ التطبيع:</strong> توحيد الصيغ والتنسيقات
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="main-section">
+            <div class="section-title">💪 قوة النظام</div>
+            <div class="feature-list">
+                <div class="feature-item">
+                    <strong>⚡ سرعة فائقة:</strong> معالجة آلاف الصفوف في ثوانٍ
+                </div>
+                <div class="feature-item">
+                    <strong>🎯 دقة عالية:</strong> خوارزميات ذكاء اصطناعي متقدمة
+                </div>
+                <div class="feature-item">
+                    <strong>🔒 أمان كامل:</strong> بياناتك آمنة ولا تُحفظ
+                </div>
+                <div class="feature-item">
+                    <strong>🌍 دعم متعدد:</strong> يدعم العربية والإنجليزية
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentJobId = null;
+        let processedData = null;
+
+        // Setup drag and drop
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        async function handleFile(file) {
+            // Validate file
+            const validTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 
+                              'application/vnd.ms-excel', 
+                              'text/csv'];
+            
+            if (!validTypes.includes(file.type) && !file.name.match(/\.(xlsx|xls|csv)$/i)) {
+                alert('❌ نوع الملف غير مدعوم! يرجى رفع ملف Excel أو CSV');
+                return;
+            }
+
+            if (file.size > 50 * 1024 * 1024) {
+                alert('❌ حجم الملف كبير جداً! الحد الأقصى 50 ميجابايت');
+                return;
+            }
+
+            // Show progress
+            document.getElementById('progressSection').classList.add('show');
+            uploadArea.style.display = 'none';
+
+            // Upload file
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                updateProgress(10, 'جاري رفع الملف...');
+                
+                const response = await fetch('/api/v1/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                updateProgress(30, 'جاري تحليل البيانات...');
+
+                if (!response.ok) {
+                    throw new Error('فشل رفع الملف');
+                }
+
+                const result = await response.json();
+                currentJobId = result.job_id;
+
+                updateProgress(50, 'جاري التنظيف والتصنيف...');
+
+                // Start cleaning
+                await startCleaning(currentJobId);
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ حدث خطأ: ' + error.message);
+                resetPage();
+            }
+        }
+
+        async function startCleaning(jobId) {
+            try {
+                const response = await fetch(`/api/v1/jobs/${jobId}/clean`, {
+                    method: 'POST'
+                });
+
+                updateProgress(70, 'جاري التصنيف والتحليل...');
+
+                if (!response.ok) {
+                    throw new Error('فشلت عملية التنظيف');
+                }
+
+                // Poll for results
+                await pollResults(jobId);
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ حدث خطأ في التنظيف: ' + error.message);
+                resetPage();
+            }
+        }
+
+        async function pollResults(jobId) {
+            const maxAttempts = 60;
+            let attempts = 0;
+
+            const poll = setInterval(async () => {
+                attempts++;
+                
+                if (attempts > maxAttempts) {
+                    clearInterval(poll);
+                    alert('❌ انتهت المهلة - يرجى المحاولة مرة أخرى');
+                    resetPage();
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/api/v1/jobs/${jobId}/results`);
+                    const result = await response.json();
+
+                    if (result.status === 'completed') {
+                        clearInterval(poll);
+                        updateProgress(100, 'تم بنجاح! ✅');
+                        setTimeout(() => showResults(result), 500);
+                    } else if (result.status === 'failed') {
+                        clearInterval(poll);
+                        throw new Error('فشلت عملية التنظيف');
+                    } else {
+                        const progress = 70 + (attempts * 0.5);
+                        updateProgress(Math.min(progress, 95), 'جاري المعالجة...');
+                    }
+                } catch (error) {
+                    clearInterval(poll);
+                    console.error('Error:', error);
+                    alert('❌ حدث خطأ: ' + error.message);
+                    resetPage();
+                }
+            }, 1000);
+        }
+
+        function updateProgress(percent, text) {
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            
+            progressBar.style.width = percent + '%';
+            progressBar.textContent = Math.round(percent) + '%';
+            progressText.textContent = text;
+        }
+
+        function showResults(data) {
+            processedData = data;
+            
+            // Hide progress, show results
+            document.getElementById('progressSection').classList.remove('show');
+            document.getElementById('resultsSection').classList.add('show');
+
+            // Update stats
+            const stats = data.summary || {};
+            document.getElementById('totalRows').textContent = stats.total_rows || 0;
+            document.getElementById('cleanedRows').textContent = stats.rows_cleaned || 0;
+            document.getElementById('validPhones').textContent = stats.valid_phones || 0;
+            document.getElementById('validEmails').textContent = stats.valid_emails || 0;
+            document.getElementById('duplicates').textContent = stats.duplicates_found || 0;
+            document.getElementById('classified').textContent = stats.rows_classified || 0;
+        }
+
+        async function downloadResults(format) {
+            if (!currentJobId) {
+                alert('❌ لا توجد نتائج للتحميل');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/v1/jobs/${currentJobId}/export?format=${format}`);
+                
+                if (!response.ok) {
+                    throw new Error('فشل تحميل الملف');
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `cleaned_data_${Date.now()}.${format === 'excel' ? 'xlsx' : 'csv'}`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ حدث خطأ في التحميل: ' + error.message);
+            }
+        }
+
+        function viewPreview() {
+            const previewSection = document.getElementById('previewSection');
+            const detailsSection = document.getElementById('detailsSection');
+            
+            if (previewSection.classList.contains('hidden')) {
+                previewSection.classList.remove('hidden');
+                detailsSection.classList.add('hidden');
+                
+                // Load preview data (mock for now)
+                loadPreviewData();
+            } else {
+                previewSection.classList.add('hidden');
+            }
+        }
+
+        function viewDetails() {
+            const previewSection = document.getElementById('previewSection');
+            const detailsSection = document.getElementById('detailsSection');
+            
+            if (detailsSection.classList.contains('hidden')) {
+                detailsSection.classList.remove('hidden');
+                previewSection.classList.add('hidden');
+            } else {
+                detailsSection.classList.add('hidden');
+            }
+        }
+
+        function loadPreviewData() {
+            // This would be populated with real data from the API
+            const table = document.getElementById('previewTable');
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>الاسم</th>
+                        <th>الهاتف</th>
+                        <th>الإيميل</th>
+                        <th>الشركة</th>
+                        <th>الحالة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>أحمد محمد</td>
+                        <td class="status-valid">966501234567</td>
+                        <td class="status-valid">user@example.com</td>
+                        <td>شركة التقنية</td>
+                        <td class="status-valid">✅ صالح</td>
+                    </tr>
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: #666; padding: 30px;">
+                            سيتم عرض البيانات الفعلية بعد التنظيف...
+                        </td>
+                    </tr>
+                </tbody>
+            `;
+        }
+
+        function resetPage() {
+            currentJobId = null;
+            processedData = null;
+            document.getElementById('progressSection').classList.remove('show');
+            document.getElementById('resultsSection').classList.remove('show');
+            document.getElementById('uploadArea').style.display = 'block';
+            document.getElementById('fileInput').value = '';
+            document.getElementById('previewSection').classList.add('hidden');
+            document.getElementById('detailsSection').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
+

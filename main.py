@@ -40,9 +40,10 @@ app.include_router(api_router, prefix=settings.API_V1_PREFIX)
 @app.get("/")
 async def root():
     """Root endpoint - Serve HTML interface"""
-    index_path = os.path.join(static_dir, "index.html")
-    if os.path.exists(index_path):
-        return FileResponse(index_path)
+    # Serve the professional upload interface
+    upload_path = os.path.join(static_dir, "upload.html")
+    if os.path.exists(upload_path):
+        return FileResponse(upload_path)
     # Fallback to JSON if HTML not found
     return {
         "app": settings.APP_NAME,
@@ -51,6 +52,15 @@ async def root():
         "docs": "/docs",
         "api": settings.API_V1_PREFIX
     }
+
+
+@app.get("/test")
+async def test_page():
+    """Test page for individual data cleaning"""
+    test_path = os.path.join(static_dir, "test.html")
+    if os.path.exists(test_path):
+        return FileResponse(test_path)
+    return {"error": "Test page not found"}
 
 
 @app.get("/health")
