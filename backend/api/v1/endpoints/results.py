@@ -16,6 +16,9 @@ class ResultsSummary(BaseModel):
     valid_rows: int
     error_rows: int
     duplicate_rows: int
+    valid_phones: int
+    valid_emails: int
+    classified_rows: int
     quality_score: float
     processing_time: int
     completed_at: str

@@ -704,13 +704,13 @@
             document.getElementById('progressSection').classList.remove('show');
             document.getElementById('resultsSection').classList.add('show');
 
-            // Update stats from API response
+            // Update stats from API response - REAL DATA ONLY
             document.getElementById('totalRows').textContent = data.total_rows || 0;
             document.getElementById('cleanedRows').textContent = data.valid_rows || 0;
-            document.getElementById('validPhones').textContent = Math.round((data.valid_rows || 0) * 0.8);
-            document.getElementById('validEmails').textContent = Math.round((data.valid_rows || 0) * 0.7);
+            document.getElementById('validPhones').textContent = data.valid_phones || 0;
+            document.getElementById('validEmails').textContent = data.valid_emails || 0;
             document.getElementById('duplicates').textContent = data.duplicate_rows || 0;
-            document.getElementById('classified').textContent = Math.round((data.valid_rows || 0) * 0.85);
+            document.getElementById('classified').textContent = data.classified_rows || 0;
         }
 
         async function downloadResults(format) {

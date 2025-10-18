@@ -131,14 +131,17 @@ class Database:
         cursor = conn.cursor()
         
         cursor.execute("""
-            INSERT INTO statistics (job_id, total_rows, valid_rows, error_rows, duplicate_rows, quality_score, processing_time)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO statistics (job_id, total_rows, valid_rows, error_rows, duplicate_rows, valid_phones, valid_emails, classified_rows, quality_score, processing_time)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             job_id,
             stats.get('total_rows', 0),
             stats.get('valid_rows', 0),
             stats.get('error_rows', 0),
             stats.get('duplicate_rows', 0),
+            stats.get('valid_phones', 0),
+            stats.get('valid_emails', 0),
+            stats.get('classified_rows', 0),
             stats.get('quality_score', 0.0),
             stats.get('processing_time', 0)
         ))
@@ -153,7 +156,7 @@ class Database:
         cursor = conn.cursor()
         
         cursor.execute("""
-            SELECT total_rows, valid_rows, error_rows, duplicate_rows, quality_score, processing_time
+            SELECT total_rows, valid_rows, error_rows, duplicate_rows, valid_phones, valid_emails, classified_rows, quality_score, processing_time
             FROM statistics
             WHERE job_id = ?
         """, (job_id,))
@@ -168,8 +171,11 @@ class Database:
                 'valid_rows': row[1],
                 'error_rows': row[2],
                 'duplicate_rows': row[3],
-                'quality_score': row[4],
-                'processing_time': row[5],
+                'valid_phones': row[4],
+                'valid_emails': row[5],
+                'classified_rows': row[6],
+                'quality_score': row[7],
+                'processing_time': row[8],
                 'completed_at': datetime.now().isoformat()
             }
         return None

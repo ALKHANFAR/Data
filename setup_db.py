@@ -75,6 +75,9 @@ def create_database():
             valid_rows INTEGER DEFAULT 0,
             error_rows INTEGER DEFAULT 0,
             duplicate_rows INTEGER DEFAULT 0,
+            valid_phones INTEGER DEFAULT 0,
+            valid_emails INTEGER DEFAULT 0,
+            classified_rows INTEGER DEFAULT 0,
             quality_score REAL DEFAULT 0.0,
             processing_time INTEGER DEFAULT 0,
             FOREIGN KEY (job_id) REFERENCES jobs(id)

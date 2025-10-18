@@ -152,16 +152,36 @@ def process_cleaning_job(job_id: str, file_id: str, settings_dict: dict):
         # Save to database
         Database.save_results(job_id, results)
         
-        # Calculate statistics
+        # Calculate REAL statistics from cleaned data
         valid_rows = len(df)
         error_rows = 0
-        duplicate_rows = df.get('is_duplicate', pd.Series([False] * len(df))).sum() if 'is_duplicate' in df.columns else 0
+        duplicate_rows = df['is_duplicate'].sum() if 'is_duplicate' in df.columns else 0
+        
+        # Count valid phones
+        valid_phones = 0
+        phone_status_cols = [col for col in df.columns if col.endswith('_status') and 'هاتف' in col]
+        for col in phone_status_cols:
+            valid_phones += (df[col] == 'valid').sum()
+        
+        # Count valid emails
+        valid_emails = 0
+        email_status_cols = [col for col in df.columns if col.endswith('_status') and 'إيميل' in col]
+        for col in email_status_cols:
+            valid_emails += (df[col] == 'valid').sum()
+        
+        # Count classified rows (with geo data)
+        classified_rows = 0
+        if 'geo_country' in df.columns:
+            classified_rows = df['geo_country'].notna().sum()
         
         stats = {
             'total_rows': total_rows,
             'valid_rows': valid_rows,
             'error_rows': error_rows,
             'duplicate_rows': int(duplicate_rows),
+            'valid_phones': int(valid_phones),
+            'valid_emails': int(valid_emails),
+            'classified_rows': int(classified_rows),
             'quality_score': (valid_rows / total_rows * 100) if total_rows > 0 else 0,
             'processing_time': 0
         }
