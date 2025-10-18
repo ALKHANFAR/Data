@@ -51,6 +51,20 @@ class CleaningService:
             rows, cols = len(df), len(df.columns)
             logger.info(f"✅ Successfully loaded {rows:,} rows, {cols} columns")
             
+            # ✅ CONVERT ALL NON-SERIALIZABLE TYPES TO STRINGS
+            logger.info("Converting all data types to JSON-serializable format...")
+            for col in df.columns:
+                # Check if column has datetime/timedelta types
+                if df[col].dtype == 'datetime64[ns]' or df[col].dtype == 'timedelta64[ns]':
+                    df[col] = df[col].astype(str).replace('NaT', '')
+                elif df[col].dtype == 'object':
+                    # Convert any remaining datetime/timedelta objects
+                    df[col] = df[col].apply(lambda x: str(x) if pd.notna(x) and not isinstance(x, (str, int, float, bool)) else x)
+            
+            # Replace NaN with empty strings
+            df = df.fillna('')
+            logger.info("✅ Data types converted successfully")
+            
             # Validate row count
             max_rows = self.settings.get('max_rows_limit', 100000)
             if rows > max_rows:

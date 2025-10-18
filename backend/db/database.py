@@ -103,22 +103,62 @@ class Database:
         return None
     
     @staticmethod
+    def make_json_serializable(obj):
+        """Convert any type to JSON-serializable format - FLEXIBLE FOR ANY FILE TYPE"""
+        import pandas as pd
+        import numpy as np
+        from datetime import datetime, date, timedelta
+        
+        if isinstance(obj, dict):
+            return {k: Database.make_json_serializable(v) for k, v in obj.items()}
+        elif isinstance(obj, (list, tuple)):
+            return [Database.make_json_serializable(item) for item in obj]
+        elif isinstance(obj, (pd.Timestamp, datetime, date)):
+            return obj.isoformat() if pd.notna(obj) else ""
+        elif isinstance(obj, timedelta):
+            return str(obj)
+        elif isinstance(obj, (np.integer, np.int64, np.int32, np.int16, np.int8)):
+            return int(obj)
+        elif isinstance(obj, (np.floating, np.float64, np.float32, np.float16)):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        elif isinstance(obj, pd.Series):
+            return obj.to_list()
+        elif isinstance(obj, bool):
+            return obj
+        elif pd.isna(obj) or obj is None:
+            return ""
+        elif isinstance(obj, bytes):
+            return obj.decode('utf-8', errors='ignore')
+        else:
+            try:
+                return str(obj) if obj != "" else ""
+            except:
+                return ""
+    
+    @staticmethod
     def save_results(job_id: str, results: List[Dict]):
-        """Save cleaning results"""
+        """Save cleaning results - HANDLES ANY DATA TYPE"""
         conn = Database.get_connection()
         cursor = conn.cursor()
         
         for idx, result in enumerate(results):
+            # ✅ Make everything JSON-serializable
+            original_data = Database.make_json_serializable(result.get('original', {}))
+            cleaned_data = Database.make_json_serializable(result.get('cleaned', {}))
+            errors = result.get('errors', [])
+            
             cursor.execute("""
                 INSERT INTO results (job_id, row_index, original_data, cleaned_data, status, errors)
                 VALUES (?, ?, ?, ?, ?, ?)
             """, (
                 job_id,
                 idx,
-                json.dumps(result.get('original', {})),
-                json.dumps(result.get('cleaned', {})),
+                json.dumps(original_data, ensure_ascii=False),
+                json.dumps(cleaned_data, ensure_ascii=False),
                 result.get('status', 'valid'),
-                json.dumps(result.get('errors', []))
+                json.dumps(errors, ensure_ascii=False)
             ))
         
         conn.commit()
