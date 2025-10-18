@@ -8,14 +8,23 @@ from backend.config.countries import get_country_info
 
 
 class PhoneCleaner:
-    """Professional Phone Number Cleaner"""
+    """Professional Phone Number Cleaner - Industrial Grade"""
     
     # Service numbers to exclude
     SERVICE_NUMBERS = ['900', '911', '999', '112', '996', '997', '998']
     
+    # Fake marketing numbers (commonly used fake numbers)
+    FAKE_NUMBERS = [
+        '0555555555', '0500000000', '0511111111', '0522222222', '0533333333',
+        '0544444444', '0566666666', '0577777777', '0588888888', '0599999999',
+        '966555555555', '966500000000', '966511111111', '966522222222',
+        '0000000000', '1111111111', '1234567890', '0123456789',
+        '9665555555555', '9665000000000'
+    ]
+    
     @staticmethod
     def extract_numbers(text: str) -> str:
-        """Extract only numbers from text"""
+        """Extract only numbers from text, handling extensions"""
         if not text:
             return ""
         
@@ -27,6 +36,9 @@ class PhoneCleaner:
         if any(err in text.upper() for err in excel_errors):
             return ""
         
+        # Remove extensions (e.g., "ext. 123", "ext 123", "x123", "extension 123")
+        text = re.sub(r'\s*(ext\.?|extension|x)\s*\d+', '', text, flags=re.IGNORECASE)
+        
         # Convert Arabic numbers to English
         arabic_nums = '٠١٢٣٤٥٦٧٨٩'
         english_nums = '0123456789'
@@ -37,6 +49,29 @@ class PhoneCleaner:
         numbers = re.sub(r'[^0-9]', '', text)
         
         return numbers
+    
+    @staticmethod
+    def is_fake_number(phone: str) -> bool:
+        """Check if it's a fake marketing number"""
+        # Check full number
+        if phone in PhoneCleaner.FAKE_NUMBERS:
+            return True
+        
+        # Check last 10 digits (local format)
+        if len(phone) >= 10:
+            local = phone[-10:]
+            if local in PhoneCleaner.FAKE_NUMBERS:
+                return True
+            
+            # Check for repeating patterns (all same digit)
+            if len(set(local)) == 1:
+                return True
+            
+            # Check for sequential patterns
+            if local in ['0123456789', '9876543210', '1234567890']:
+                return True
+        
+        return False
     
     @staticmethod
     def is_service_number(phone: str) -> bool:
@@ -86,18 +121,41 @@ class PhoneCleaner:
         return None
     
     @staticmethod
+    def is_unified_number(phone: str, country_code: str) -> bool:
+        """Check if it's a Saudi unified number (920)"""
+        if country_code == '966':
+            after_code = phone[len(country_code):]
+            return after_code.startswith('920')
+        return False
+    
+    @staticmethod
     def convert_local_to_international(phone: str) -> Optional[str]:
         """Convert local format to international"""
-        # Saudi Arabia patterns
+        # Saudi Arabia patterns (mobile + landline + unified)
         if re.match(r'^5\d{8}$', phone):
             return '966' + phone
         if re.match(r'^05\d{8}$', phone):
             return '966' + phone[1:]
+        # Saudi unified numbers (920)
+        if re.match(r'^920\d{6}$', phone):
+            return '966' + phone
+        if re.match(r'^0920\d{6}$', phone):
+            return '966' + phone[1:]
+        # Saudi landlines (01x, 02x, 03x, 04x)
+        if re.match(r'^0[1-4]\d{7}$', phone):
+            return '966' + phone[1:]
+        if re.match(r'^[1-4]\d{7}$', phone):
+            return '966' + phone
         
-        # UAE patterns
+        # UAE patterns (mobile + landline)
         if re.match(r'^5\d{8}$', phone):
             return '971' + phone
         if re.match(r'^05\d{8}$', phone):
+            return '971' + phone[1:]
+        # UAE landlines (02, 03, 04, etc.)
+        if re.match(r'^[234679]\d{7}$', phone):
+            return '971' + phone
+        if re.match(r'^0[234679]\d{7}$', phone):
             return '971' + phone[1:]
         
         # Kuwait patterns
@@ -186,6 +244,18 @@ class PhoneCleaner:
         # Normalize
         phone = PhoneCleaner.normalize_phone(phone)
         
+        # Check fake numbers (BEFORE service numbers for efficiency)
+        if PhoneCleaner.is_fake_number(phone):
+            return {
+                'clean': '',
+                'country': '',
+                'country_code': '',
+                'status': 'error',
+                'type': 'fake',
+                'error': 'رقم مزيف/تسويقي',
+                'category': 'fake_number'
+            }
+        
         # Check service numbers
         if PhoneCleaner.is_service_number(phone):
             return {
@@ -262,6 +332,19 @@ class PhoneCleaner:
                 'note': 'نظام موحد'
             }
         
+        # Check for Saudi unified numbers (920) - INDUSTRIAL GRADE
+        if PhoneCleaner.is_unified_number(phone, country_code):
+            return {
+                'clean': phone,
+                'country': country_info['name'],
+                'country_code': country_code,
+                'status': 'valid',
+                'type': 'unified_number',
+                'error': '',
+                'category': 'unified_number',
+                'note': 'رقم موحد'
+            }
+        
         # Check mobile prefixes
         is_mobile = False
         if country_info.get('mobile'):
@@ -281,7 +364,7 @@ class PhoneCleaner:
                 'category': 'mobile'
             }
         
-        # Check landline prefixes
+        # Check landline prefixes - NOW ACCEPTED AS VALID (INDUSTRIAL GRADE)
         is_landline = False
         if country_info.get('landline'):
             for prefix in country_info['landline']:
@@ -291,13 +374,14 @@ class PhoneCleaner:
         
         if is_landline:
             return {
-                'clean': '',
+                'clean': phone,
                 'country': country_info['name'],
                 'country_code': country_code,
-                'status': 'error',
+                'status': 'valid',  # Changed from 'error' to 'valid'
                 'type': 'landline',
-                'error': f"رقم أرضي (يبدأ بـ {after_code[:2]})",
-                'category': 'landline'
+                'error': '',
+                'category': 'landline',
+                'note': f'رقم أرضي (يبدأ بـ {after_code[:2]})'
             }
         
         # Unknown prefix

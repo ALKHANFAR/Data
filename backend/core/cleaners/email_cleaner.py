@@ -1,21 +1,82 @@
 """
-Email Cleaner - 15 Comprehensive Checks
-FIXED VERSION - All bugs resolved
+Email Cleaner - 15 Comprehensive Checks + Typo Correction
+INDUSTRIAL GRADE VERSION
 """
 import re
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 
 class EmailCleaner:
-    """Professional Email Cleaner - Bug-free version"""
+    """Professional Email Cleaner - Industrial Grade"""
     
-    # Disposable email domains
+    # Expanded disposable email domains (updated 2025)
     DISPOSABLE_DOMAINS = [
         '10minutemail', 'tempmail', 'throwaway', 'guerrillamail',
         'mailinator', 'yopmail', 'maildrop', 'trashmail',
         'temp-mail', 'fakeinbox', 'getnada', 'getairmail',
-        'sharklasers', 'spam4.me', 'tempr.email', 'mohmal'
+        'sharklasers', 'spam4.me', 'tempr.email', 'mohmal',
+        # Additional 2025 disposable domains
+        'guerrillamailblock', 'pokemail', 'spamgourmet', 'mintemail',
+        'mytemp.email', 'tempinbox', 'fakemailgenerator', 'throwawaymail',
+        '10minemail', 'emailondeck', 'mailcatch', 'mailin8r',
+        'mailnesia', 'trashmailer', 'incognitomail', 'anonymbox',
+        'discard.email', 'spambox', 'trash-mail', 'tmpmail',
+        'zetmail', 'mailmoat', 'mailforspam', 'no-spam',
+        'emailtemporanea', 'correotemporal', 'boun.cr', 'melt.li',
+        'snapmail', 'filzmail', 'tmpeml', 'bugmenot',
+        'spaminator', 'spamfree24', 'email60', 'emaildrop'
     ]
+    
+    # Common domain typos and their corrections - INDUSTRIAL GRADE
+    DOMAIN_TYPOS = {
+        # Gmail variations
+        'gmial.com': 'gmail.com',
+        'gmai.com': 'gmail.com',
+        'gmaill.com': 'gmail.com',
+        'gmil.com': 'gmail.com',
+        'gmal.com': 'gmail.com',
+        'gmail.co': 'gmail.com',
+        'gmailc.om': 'gmail.com',
+        'gmaol.com': 'gmail.com',
+        
+        # Hotmail variations
+        'hotmial.com': 'hotmail.com',
+        'hotmai.com': 'hotmail.com',
+        'hotmal.com': 'hotmail.com',
+        'hotmil.com': 'hotmail.com',
+        'hotmail.co': 'hotmail.com',
+        'hotmaill.com': 'hotmail.com',
+        
+        # Yahoo variations
+        'yaho.com': 'yahoo.com',
+        'yahooo.com': 'yahoo.com',
+        'yhoo.com': 'yahoo.com',
+        'yahoo.co': 'yahoo.com',
+        'yhaoo.com': 'yahoo.com',
+        
+        # Outlook variations
+        'outlok.com': 'outlook.com',
+        'outloo.com': 'outlook.com',
+        'outlookk.com': 'outlook.com',
+        'outlook.co': 'outlook.com',
+        'outloook.com': 'outlook.com',
+        
+        # Live variations
+        'live.co': 'live.com',
+        'livee.com': 'live.com',
+        'liv.com': 'live.com',
+        
+        # iCloud variations
+        'iclod.com': 'icloud.com',
+        'icloud.co': 'icloud.com',
+        'iclou.com': 'icloud.com',
+        'icould.com': 'icloud.com',
+        
+        # ProtonMail variations
+        'protonmial.com': 'protonmail.com',
+        'protonmail.co': 'protonmail.com',
+        'protonmai.com': 'protonmail.com',
+    }
     
     # Role-based email prefixes
     ROLE_BASED = [
@@ -26,6 +87,25 @@ class EmailCleaner:
     
     # Suspicious characters for security check
     SUSPICIOUS_CHARS = ["'", '"', '--', ';', '<', '>', '\\']
+    
+    @staticmethod
+    def suggest_correction(email: str) -> Optional[str]:
+        """Suggest typo correction for common domain mistakes"""
+        if '@' not in email:
+            return None
+        
+        try:
+            local, domain = email.split('@', 1)
+            domain_lower = domain.lower()
+            
+            # Check for exact match in typo dictionary
+            if domain_lower in EmailCleaner.DOMAIN_TYPOS:
+                suggested = f"{local}@{EmailCleaner.DOMAIN_TYPOS[domain_lower]}"
+                return suggested
+        except:
+            return None
+        
+        return None
     
     @staticmethod
     def is_disposable(email: str) -> bool:
@@ -47,7 +127,7 @@ class EmailCleaner:
     @staticmethod
     def validate_email(email: Any) -> Dict:
         """
-        Validate email with 15 comprehensive checks
+        Validate email with 15 comprehensive checks + typo correction
         
         Args:
             email: Email address (any type will be validated)
@@ -60,7 +140,8 @@ class EmailCleaner:
                 'category': str,
                 'is_disposable': bool,
                 'is_role_based': bool,
-                'has_suspicious_chars': bool
+                'has_suspicious_chars': bool,
+                'suggested_correction': str or None  # Suggested fix for typos
             }
         """
         # Check 1: Handle None
@@ -131,6 +212,18 @@ class EmailCleaner:
         
         # Clean and lowercase
         email = email.lower()
+        
+        # Check 3.5: Suspicious characters (EARLY security check)
+        if EmailCleaner.has_suspicious_chars(email):
+            return {
+                'clean': '',
+                'status': 'error',
+                'error': 'يحتوي على أحرف خطرة (SQL Injection/XSS)',
+                'category': 'suspicious_chars',
+                'is_disposable': False,
+                'is_role_based': False,
+                'has_suspicious_chars': True
+            }
         
         # Check 4: Excel errors
         excel_errors = ['#error', '#ref', '#n/a', '#value', '#div/0', '#name', '#null']
@@ -306,10 +399,24 @@ class EmailCleaner:
                 'has_suspicious_chars': False
             }
         
-        # Check 17: Role-based email
+        # Check 17: Typo detection - INDUSTRIAL GRADE
+        suggested = EmailCleaner.suggest_correction(email)
+        if suggested:
+            return {
+                'clean': '',
+                'status': 'error',
+                'error': f'خطأ إملائي محتمل - هل تقصد: {suggested}؟',
+                'category': 'possible_typo',
+                'is_disposable': False,
+                'is_role_based': False,
+                'has_suspicious_chars': False,
+                'suggested_correction': suggested
+            }
+        
+        # Check 18: Role-based email
         is_role_based = EmailCleaner.is_role_based(email)
         
-        # Check 18: Suspicious characters (security) - NEW
+        # Check 19: Suspicious characters (security)
         has_suspicious = EmailCleaner.has_suspicious_chars(email)
         
         # Valid email
@@ -320,7 +427,8 @@ class EmailCleaner:
             'category': 'valid',
             'is_disposable': False,
             'is_role_based': is_role_based,
-            'has_suspicious_chars': has_suspicious
+            'has_suspicious_chars': has_suspicious,
+            'suggested_correction': None
         }
     
     @staticmethod

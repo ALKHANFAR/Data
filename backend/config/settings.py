@@ -7,23 +7,23 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    """Application Settings"""
+    """Application Settings - Production Ready"""
     
     # App Info
-    APP_NAME: str = "Data Cleaning System"
+    APP_NAME: str = "Enterprise Data Cleaner"
     APP_VERSION: str = "1.0.0"
-    DEBUG: bool = True
+    DEBUG: bool = False  # Changed to False for production safety
     
     # API
     API_V1_PREFIX: str = "/api/v1"
     
-    # Security
-    SECRET_KEY: str = "your-secret-key-change-in-production"
+    # Security - READ FROM ENVIRONMENT VARIABLES
+    SECRET_KEY: str = os.getenv("SECRET_KEY", "dev-secret-key-change-in-production-URGENT")
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
     
-    # Database
-    DATABASE_URL: str = "sqlite:///./data_cleaning.db"
+    # Database - READ FROM ENVIRONMENT
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./data_cleaning.db")
     DB_ECHO: bool = False
     DB_POOL_SIZE: int = 5
     DB_MAX_OVERFLOW: int = 10
@@ -39,11 +39,11 @@ class Settings(BaseSettings):
     MAX_WORKERS: int = 4
     
     # Celery Settings
-    CELERY_BROKER_URL: str = "redis://localhost:6379/0"
-    CELERY_RESULT_BACKEND: str = "redis://localhost:6379/0"
+    CELERY_BROKER_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+    CELERY_RESULT_BACKEND: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
     
-    # CORS
-    CORS_ORIGINS: str = "http://localhost:3000,http://localhost:8000"
+    # CORS - READ FROM ENVIRONMENT
+    CORS_ORIGINS: str = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:8000")
     
     @property
     def cors_origins_list(self) -> List[str]:

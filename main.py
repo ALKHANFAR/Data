@@ -1,17 +1,20 @@
 """
 FastAPI Main Application
-Data Cleaning System
+Data Cleaning System - Industrial Grade
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from backend.config.settings import settings
 from backend.api.v1.router import api_router
+import os
 
 # Create FastAPI app
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
-    description="Professional Data Cleaning System - 78 Countries Support",
+    description="Professional Data Cleaning System - Industrial Grade - 78 Countries Support",
     docs_url="/docs",
     redoc_url="/redoc"
 )
@@ -25,13 +28,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Mount static files if directory exists
+static_dir = os.path.join(os.path.dirname(__file__), "static")
+if os.path.exists(static_dir):
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+
 # Include API router
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)
 
 
 @app.get("/")
 async def root():
-    """Root endpoint"""
+    """Root endpoint - Serve HTML interface"""
+    index_path = os.path.join(static_dir, "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    # Fallback to JSON if HTML not found
     return {
         "app": settings.APP_NAME,
         "version": settings.APP_VERSION,
