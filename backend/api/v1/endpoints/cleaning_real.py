@@ -133,7 +133,8 @@ def process_cleaning_job(job_id: str, file_id: str, settings_dict: dict):
         # Step 9: Find duplicates
         if settings_dict.get('remove_duplicates', True):
             Database.update_job_progress(job_id, 0.9, "جاري كشف التكرار...", "processing")
-            df = cleaner.find_duplicates(df)
+            # Just mark duplicates, don't need key columns
+            df['is_duplicate'] = df.duplicated(keep='first')
         
         # Step 10: Save results
         Database.update_job_progress(job_id, 0.95, "جاري حفظ النتائج...", "processing")
