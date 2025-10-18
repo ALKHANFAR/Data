@@ -31,12 +31,13 @@ class Settings(BaseSettings):
     # Upload Settings
     UPLOAD_DIR: str = "./uploads"
     EXPORT_DIR: str = "./exports"
-    MAX_FILE_SIZE: int = 50 * 1024 * 1024  # 50MB
+    MAX_FILE_SIZE: int = 100 * 1024 * 1024  # 100MB - يستحمل ملفات ضخمة
     ALLOWED_EXTENSIONS: str = ".xlsx,.xls,.csv,.txt"
     
-    # Processing Settings
-    CHUNK_SIZE: int = 1000
-    MAX_WORKERS: int = 4
+    # Processing Settings - محسّن للآلاف من الصفوف
+    CHUNK_SIZE: int = 5000  # معالجة 5000 صف دفعة واحدة
+    MAX_WORKERS: int = 8  # 8 عمليات متوازية
+    MAX_ROWS_LIMIT: int = 100000  # حد أقصى 100,000 صف
     
     # Celery Settings
     CELERY_BROKER_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")

@@ -10,11 +10,11 @@ from backend.config.settings import settings
 from backend.api.v1.router import api_router
 import os
 
-# Create FastAPI app
+# Create FastAPI app with large file support
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
-    description="Professional Data Cleaning System - Industrial Grade - 78 Countries Support",
+    description="Professional Data Cleaning System - Industrial Grade - 78 Countries Support - Handles 100K+ rows",
     docs_url="/docs",
     redoc_url="/redoc"
 )

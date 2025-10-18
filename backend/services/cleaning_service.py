@@ -35,18 +35,33 @@ class CleaningService:
         }
     
     def load_file(self, file_path: str) -> pd.DataFrame:
-        """Load file into DataFrame"""
+        """Load file into DataFrame - Optimized for large files"""
         logger.info(f"Loading file: {file_path}")
         
-        if file_path.endswith('.csv'):
-            df = pd.read_csv(file_path)
-        elif file_path.endswith(('.xlsx', '.xls')):
-            df = pd.read_excel(file_path)
-        else:
-            raise ValueError(f"Unsupported file type: {file_path}")
-        
-        logger.info(f"Loaded {len(df)} rows, {len(df.columns)} columns")
-        return df
+        try:
+            if file_path.endswith('.csv'):
+                # Use efficient CSV reading with low_memory option
+                df = pd.read_csv(file_path, low_memory=False)
+            elif file_path.endswith(('.xlsx', '.xls')):
+                # For Excel, read with optimal engine
+                df = pd.read_excel(file_path, engine='openpyxl' if file_path.endswith('.xlsx') else None)
+            else:
+                raise ValueError(f"Unsupported file type: {file_path}")
+            
+            rows, cols = len(df), len(df.columns)
+            logger.info(f"✅ Successfully loaded {rows:,} rows, {cols} columns")
+            
+            # Validate row count
+            max_rows = self.settings.get('max_rows_limit', 100000)
+            if rows > max_rows:
+                logger.warning(f"⚠️ File has {rows:,} rows, exceeding limit of {max_rows:,}. Processing first {max_rows:,} rows.")
+                df = df.head(max_rows)
+            
+            return df
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to load file: {str(e)}")
+            raise
     
     def detect_columns(self, df: pd.DataFrame) -> Dict:
         """Detect column types automatically"""
