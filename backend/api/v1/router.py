@@ -2,7 +2,8 @@
 Main API Router
 """
 from fastapi import APIRouter
-from backend.api.v1.endpoints import auth, upload, cleaning, results, export
+from backend.api.v1.endpoints import auth, upload, results, export
+from backend.api.v1.endpoints import cleaning_real as cleaning
 
 api_router = APIRouter()
 

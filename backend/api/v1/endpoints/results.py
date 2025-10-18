@@ -5,6 +5,8 @@ from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 
+from backend.db.database import Database
+
 router = APIRouter()
 
 
@@ -38,20 +40,20 @@ class ResultsPreview(BaseModel):
 @router.get("/{job_id}/summary", response_model=ResultsSummary)
 async def get_results_summary(job_id: str):
     """
-    Get cleaning results summary
+    Get cleaning results summary - REAL IMPLEMENTATION
     """
-    # TODO: Get from database
-    
-    return {
-        "job_id": job_id,
-        "total_rows": 100000,
-        "valid_rows": 85420,
-        "error_rows": 12380,
-        "duplicate_rows": 2200,
-        "quality_score": 92.5,
-        "processing_time": 345,
-        "completed_at": "2024-01-15T14:30:00"
-    }
+    try:
+        stats = Database.get_statistics(job_id)
+        
+        if not stats:
+            raise HTTPException(status_code=404, detail="Results not found")
+        
+        return stats
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/{job_id}/preview", response_model=ResultsPreview)
@@ -62,31 +64,14 @@ async def get_results_preview(
     filter_status: Optional[str] = Query(None, regex="^(valid|error|duplicate)$")
 ):
     """
-    Get paginated results preview
+    Get paginated results preview - REAL IMPLEMENTATION
     """
-    # TODO: Get from database
-    
-    dummy_data = []
-    for i in range(page_size):
-        dummy_data.append({
-            "index": (page - 1) * page_size + i,
-            "data": {
-                "name": f"شركة {i}",
-                "phone": f"966501234{i:03d}",
-                "email": f"company{i}@example.com"
-            },
-            "status": "valid" if i % 3 != 0 else "error",
-            "errors": [] if i % 3 != 0 else ["رقم غير صالح"]
-        })
-    
-    return {
-        "job_id": job_id,
-        "total_rows": 100000,
-        "data": dummy_data,
-        "page": page,
-        "page_size": page_size,
-        "has_more": page * page_size < 100000
-    }
+    try:
+        results = Database.get_results_preview(job_id, page, page_size)
+        return results
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/{job_id}/stats")

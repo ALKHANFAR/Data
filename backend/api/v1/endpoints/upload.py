@@ -8,9 +8,12 @@ import os
 import uuid
 import pandas as pd
 from datetime import datetime
+import logging
 
 from backend.config.settings import settings
+from backend.db.database import Database
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
@@ -78,6 +81,12 @@ async def upload_file(file: UploadFile = File(...)):
             status_code=400,
             detail=f"Failed to read file: {str(e)}"
         )
+    
+    # Save to database
+    try:
+        Database.save_file(file_id, file.filename, file_path, file_size, rows, columns)
+    except Exception as e:
+        logger.error(f"Failed to save file to database: {e}")
     
     return {
         "file_id": file_id,
